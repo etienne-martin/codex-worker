@@ -294,6 +294,7 @@ jobs:
           COMMENT_BODY: ${{ steps.comment_data.outputs.comment_body }}
           MODEL: ${{ inputs.model }}
           REASONING_EFFORT: ${{ inputs.reasoning_effort }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
