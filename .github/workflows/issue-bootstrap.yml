@@ -229,7 +229,7 @@ jobs:
             exit 0
           fi
 
-          latest_session=$(find "$CODEX_SESSIONS_PATH" -type f -name "*.jsonl" -print0 | xargs -0 ls -t | head -n 1 || true)
+          latest_session=$(find "$CODEX_SESSIONS_PATH" -type f -name "*.jsonl" | sort | tail -n 1 || true)
           if [ -z "$latest_session" ] || [ ! -f "$latest_session" ]; then
             exit 0
           fi
