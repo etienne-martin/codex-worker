@@ -149,21 +149,10 @@ jobs:
           codex_exit=${PIPESTATUS[0]}
           set -e
 
-          session_id=$(grep -Eo 'session id: [0-9a-fA-F-]{36}' /tmp/codex_output.txt | tail -n 1 | awk '{print $3}')
-
-          if [ -z "$session_id" ]; then
-            echo "session_id=" >> "$GITHUB_OUTPUT"
-            echo "codex_exit=2" >> "$GITHUB_OUTPUT"
-            echo "Session id not found in Codex output." > /tmp/codex_output.txt
-            exit 1
-          fi
-
-          echo "session_id=$session_id" >> "$GITHUB_OUTPUT"
-
           echo "codex_exit=$codex_exit" >> "$GITHUB_OUTPUT"
 
       - name: Upload session artifact
-        if: ${{ steps.codex.outputs.session_id != '' }}
+        if: ${{ steps.codex.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: codex-worker-session-${{ inputs.issue_number }}
@@ -178,13 +167,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ inputs.issue_number }}
           CODEX_EXIT: ${{ steps.restore.outputs.codex_exit }}
-          CODEX_SESSION_ID: ${{ steps.codex.outputs.session_id }}
           CODEX_CODEX_EXIT: ${{ steps.codex.outputs.codex_exit }}
         shell: bash
         run: |
           set -euo pipefail
 
-          session_id="${CODEX_SESSION_ID:-}"
           codex_exit="${CODEX_EXIT:-$CODEX_CODEX_EXIT}"
 
           status="success"
@@ -198,9 +185,6 @@ jobs:
           fi
 
           comment_body_file=$(mktemp)
-          if [ -n "$session_id" ]; then
-            echo "<!-- codex-worker-session-id: $session_id -->" >> "$comment_body_file"
-          fi
           echo "**Codex Worker** response ($status)" >> "$comment_body_file"
           echo >> "$comment_body_file"
           cat "$response_file" >> "$comment_body_file"
