@@ -18,11 +18,9 @@ on:
       model:
         type: string
         required: false
-        default: gpt-5-codex-mini
       reasoning_effort:
         type: string
         required: false
-        default: low
     secrets:
       OPENAI_API_KEY:
         required: true
@@ -93,10 +91,18 @@ jobs:
           fi
 
           set +e
+          codex_args=()
+          if [ -n "$MODEL" ]; then
+            codex_args+=(--model "$MODEL")
+          fi
+          if [ -n "$REASONING_EFFORT" ]; then
+            codex_args+=(-c "model_reasoning_effort=$REASONING_EFFORT")
+          fi
+
           if [ -n "$session_id" ]; then
-            codex exec --model "$MODEL" -c model_reasoning_effort="$REASONING_EFFORT" resume "$session_id" "$(cat "$prompt_file")" | tee /tmp/codex_output.txt
+            codex exec "${codex_args[@]}" resume "$session_id" "$(cat "$prompt_file")" | tee /tmp/codex_output.txt
           else
-            codex exec --model "$MODEL" -c model_reasoning_effort="$REASONING_EFFORT" "$(cat "$prompt_file")" | tee /tmp/codex_output.txt
+            codex exec "${codex_args[@]}" "$(cat "$prompt_file")" | tee /tmp/codex_output.txt
           fi
           codex_exit=${PIPESTATUS[0]}
           set -e
