@@ -23,7 +23,6 @@ permissions:
   contents: read
   issues: write
   actions: read
-  reactions: write
 
 jobs:
   run:
