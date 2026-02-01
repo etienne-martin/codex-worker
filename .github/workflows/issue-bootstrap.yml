@@ -50,13 +50,35 @@ jobs:
           set -euo pipefail
           echo "CODEX_SESSIONS_PATH=$HOME/.codex/sessions" >> "$GITHUB_ENV"
 
+      - name: Find session artifact
+        id: find_artifact
+        if: ${{ inputs.comment_body != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          artifact_run_id=$(gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq '[.artifacts[] | select(.name=="codex-worker-session-${{ inputs.issue_number }}") | select(.expired==false)] | sort_by(.created_at) | last | .run_id')
+
+          if [ "$artifact_run_id" = "null" ] || [ -z "$artifact_run_id" ]; then
+            echo "missing_session=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "missing_session=false" >> "$GITHUB_OUTPUT"
+          echo "run_id=$artifact_run_id" >> "$GITHUB_OUTPUT"
+
       - name: Download session artifact
         id: download_session
-        if: ${{ inputs.comment_body != '' }}
+        if: ${{ inputs.comment_body != '' && steps.find_artifact.outputs.missing_session == 'false' }}
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: codex-worker-session-${{ inputs.issue_number }}
+          run-id: ${{ steps.find_artifact.outputs.run_id }}
+          repository: ${{ github.repository }}
           path: ${{ runner.temp }}/codex-session
 
       - name: Restore session artifact
@@ -65,6 +87,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ "${{ steps.find_artifact.outputs.missing_session }}" = "true" ]; then
+            echo "missing_session=true" >> "$GITHUB_OUTPUT"
+            echo "Session artifact not found; cannot resume." > /tmp/codex_output.txt
+            echo "codex_exit=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           if [ "${{ steps.download_session.outcome }}" != "success" ]; then
             echo "missing_session=true" >> "$GITHUB_OUTPUT"
