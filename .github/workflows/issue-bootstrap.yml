@@ -119,7 +119,7 @@ jobs:
             src="$src/sessions"
           fi
 
-          if [ ! -d "$src" ]; then
+          if [ ! -e "$src" ]; then
             echo "missing_session=true" >> "$GITHUB_OUTPUT"
             echo "Session artifact missing contents; cannot resume." > /tmp/codex_output.txt
             echo "codex_exit=1" >> "$GITHUB_OUTPUT"
