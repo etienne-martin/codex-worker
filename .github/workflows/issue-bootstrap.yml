@@ -32,8 +32,6 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    env:
-      CODEX_HOME: ${{ github.workspace }}/.codex-home
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -46,11 +44,17 @@ jobs:
       - name: Install Codex CLI
         run: npm install -g @openai/codex@0.93.0
 
+      - name: Set Codex sessions path
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CODEX_SESSIONS_PATH=$HOME/.codex/sessions" >> "$GITHUB_ENV"
+
       - name: Prepare Codex directories
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$CODEX_HOME/.codex/sessions"
+          mkdir -p "$CODEX_SESSIONS_PATH"
 
       - name: Download session artifact
         id: download_session
@@ -87,7 +91,7 @@ jobs:
             exit 0
           fi
 
-          dest="$CODEX_HOME/.codex/sessions"
+          dest="$CODEX_SESSIONS_PATH"
           mkdir -p "$dest"
           cp -a "$src/." "$dest/"
 
@@ -103,7 +107,6 @@ jobs:
           COMMENT_BODY: ${{ inputs.comment_body }}
           MODEL: ${{ inputs.model }}
           REASONING_EFFORT: ${{ inputs.reasoning_effort }}
-          HOME: ${{ env.CODEX_HOME }}
         shell: bash
         run: |
           set -euo pipefail
@@ -119,8 +122,7 @@ jobs:
 
           printenv OPENAI_API_KEY | codex login --with-api-key
 
-          session_dir="$HOME/.codex/sessions"
-          mkdir -p "$session_dir"
+          mkdir -p "$CODEX_SESSIONS_PATH"
 
           prompt_file=$(mktemp)
           if [ -n "$COMMENT_BODY" ]; then
@@ -159,7 +161,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: codex-worker-session-${{ inputs.issue_number }}
-          path: ${{ env.CODEX_HOME }}/.codex/sessions
+          path: ${{ env.CODEX_SESSIONS_PATH }}
           retention-days: 7
           overwrite: true
           if-no-files-found: error
