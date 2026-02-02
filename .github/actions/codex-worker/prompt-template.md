@@ -13,7 +13,7 @@ Instructions:
 - Read the issue title and description below.
 - Be concise and actionable.
 - Use Markdown only when it improves clarity.
-- If you need literal backticks inline, escape them (e.g., \`\`).
+- If you need literal backticks inline, escape them (e.g., \`).
 - Put code snippets in fenced code blocks on their own lines.
 - When creating PRs with `gh pr create`, pass multiline bodies via `--body-file` or a heredoc so newlines are real; do not include literal \n sequences.
 - Include a collapsed <details> section titled "Reasoning" with a brief, high-level rationale only (no step-by-step chain-of-thought).
