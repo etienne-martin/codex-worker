@@ -171,6 +171,12 @@ describe('Codex Worker action', () => {
 
     const [{ body }] = octokit.rest.issues.createComment.mock.calls[0];
     expect(body).toBe('Hello from Codex');
+    expect(octokit.rest.reactions.createForIssue).toHaveBeenCalledWith({
+      owner: 'acme',
+      repo: 'demo',
+      issue_number: 7,
+      content: 'eyes',
+    });
     expect(mockLastCodexArgs).toEqual(expect.arrayContaining(['exec', '--json']));
     expect(mockLastCodexArgs).not.toEqual(expect.arrayContaining(['resume']));
     expect(mockLastCodexInput).toContain('<title>New issue</title>');
@@ -206,6 +212,12 @@ describe('Codex Worker action', () => {
 
     const [{ body }] = octokit.rest.issues.createComment.mock.calls[0];
     expect(body).toBe('Hello from Codex');
+    expect(octokit.rest.reactions.createForIssueComment).toHaveBeenCalledWith({
+      owner: 'acme',
+      repo: 'demo',
+      comment_id: 55,
+      content: 'eyes',
+    });
     expect(mockLastCodexArgs).toEqual(expect.arrayContaining(['resume', '--last']));
     expect(mockLastCodexInput).toBe('What is up?');
   });
@@ -236,6 +248,33 @@ describe('Codex Worker action', () => {
     await waitFor(() => exec.exec.mock.calls.length > 0);
 
     expect(octokit.rest.issues.createComment).not.toHaveBeenCalled();
+  });
+
+  test('adds edited comment context to prompt', async () => {
+    setInputs({ issue_number: '15', comment_id: '101' });
+    setContext({ action: 'edited', comment: { body: 'Updated comment body' } });
+
+    const octokit = createOctokit({
+      commentBody: 'Updated comment body',
+      commentUrl: 'https://example.com/issues/15#comment-101',
+      artifacts: [
+        { id: 3, name: 'codex-worker-session-15', expired: false, created_at: '2026-02-01T00:00:00Z' },
+      ],
+    });
+    mockGetOctokit.mockReturnValue(octokit);
+
+    mockArtifactClient.downloadArtifact.mockImplementation(async (_id, options) => {
+      const sessionsDir = path.join(options.path, 'sessions');
+      fs.mkdirSync(sessionsDir, { recursive: true });
+      fs.writeFileSync(path.join(sessionsDir, 'session.jsonl'), '');
+    });
+
+    await runAction();
+    await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
+
+    expect(mockLastCodexInput).toContain('Edited comment: https://example.com/issues/15#comment-101');
+    expect(mockLastCodexInput).toContain('Respond to the updated content');
+    expect(mockLastCodexInput).toContain('Updated comment body');
   });
 
   test('reports missing OpenAI API key', async () => {
@@ -308,5 +347,39 @@ describe('Codex Worker action', () => {
     expect(body.startsWith('Issue updated: https://example.com/issues/14')).toBe(true);
     expect(mockLastCodexArgs).toEqual(expect.arrayContaining(['resume', '--last']));
     expect(mockLastCodexInput).toContain('Issue updated');
+  });
+
+  test('uses model and reasoning effort when provided', async () => {
+    setInputs({ issue_number: '16', model: 'gpt-test', reasoning_effort: 'low' });
+    setContext({ action: 'opened' });
+
+    const octokit = createOctokit();
+    mockGetOctokit.mockReturnValue(octokit);
+
+    await runAction();
+    await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
+
+    expect(mockLastCodexArgs).toEqual(expect.arrayContaining(['--model', 'gpt-test']));
+    expect(mockLastCodexArgs).toEqual(expect.arrayContaining(['-c', 'model_reasoning_effort=low']));
+  });
+
+  test('strips auth and temp files after run', async () => {
+    setInputs({ issue_number: '17' });
+    setContext({ action: 'opened' });
+
+    const octokit = createOctokit();
+    mockGetOctokit.mockReturnValue(octokit);
+
+    const rmSpy = jest.spyOn(fs, 'rmSync');
+
+    await runAction();
+    await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
+
+    expect(rmSpy).toHaveBeenCalledWith(expect.stringContaining('auth.json'), { force: true });
+    expect(rmSpy).toHaveBeenCalledWith(expect.stringContaining(path.join('codex-home', 'tmp')), {
+      recursive: true,
+      force: true,
+    });
+    rmSpy.mockRestore();
   });
 });
