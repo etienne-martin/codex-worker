@@ -98,18 +98,6 @@ const setContext = ({ action = 'opened', issue, comment } = {}) => {
   github.context.payload.comment = comment || { body: '' };
 };
 
-const getCodexCall = () => exec.exec.mock.calls.find(([cmd]) => cmd === 'codex');
-
-const getCodexArgs = () => {
-  const call = getCodexCall();
-  return call ? call[1] : null;
-};
-
-const getCodexOptions = () => {
-  const call = getCodexCall();
-  return call ? call[2] : null;
-};
-
 const createOctokit = ({
   issueTitle = 'Issue title',
   issueBody = 'Issue body',
@@ -186,11 +174,17 @@ describe('Codex Worker action', () => {
     expect(exec.exec).toHaveBeenCalledWith(
       'codex',
       expect.arrayContaining(['exec', '--json']),
-      expect.any(Object)
+      expect.objectContaining({
+        input: expect.stringContaining('<title>New issue</title>'),
+      })
     );
-    expect(getCodexArgs()).not.toEqual(expect.arrayContaining(['resume']));
-    expect(getCodexOptions()?.input).toContain('<title>New issue</title>');
-    expect(getCodexOptions()?.input).toContain('<description>Do work</description>');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.not.arrayContaining(['resume']),
+      expect.objectContaining({
+        input: expect.stringContaining('<description>Do work</description>'),
+      })
+    );
     expect(mockArtifactClient.uploadArtifact).toHaveBeenCalledWith(
       'codex-worker-session-7',
       expect.any(Array),
@@ -228,8 +222,11 @@ describe('Codex Worker action', () => {
       comment_id: 55,
       content: 'eyes',
     });
-    expect(getCodexArgs()).toEqual(expect.arrayContaining(['resume', '--last']));
-    expect(getCodexOptions()?.input).toBe('What is up?');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.arrayContaining(['resume', '--last']),
+      expect.objectContaining({ input: 'What is up?' })
+    );
   });
 
   test('fails when follow-up has no session artifact', async () => {
@@ -301,9 +298,27 @@ describe('Codex Worker action', () => {
     await runAction();
     await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
 
-    expect(getCodexOptions()?.input).toContain('Edited comment: https://example.com/issues/15#comment-101');
-    expect(getCodexOptions()?.input).toContain('Respond to the updated content');
-    expect(getCodexOptions()?.input).toContain('Updated comment body');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.any(Array),
+      expect.objectContaining({
+        input: expect.stringContaining('Edited comment: https://example.com/issues/15#comment-101'),
+      })
+    );
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.any(Array),
+      expect.objectContaining({
+        input: expect.stringContaining('Respond to the updated content'),
+      })
+    );
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.any(Array),
+      expect.objectContaining({
+        input: expect.stringContaining('Updated comment body'),
+      })
+    );
   });
 
   test('includes edited comment header in response body', async () => {
@@ -400,8 +415,13 @@ describe('Codex Worker action', () => {
 
     const [{ body }] = octokit.rest.issues.createComment.mock.calls[0];
     expect(body.startsWith('Issue updated: https://example.com/issues/14')).toBe(true);
-    expect(getCodexArgs()).toEqual(expect.arrayContaining(['resume', '--last']));
-    expect(getCodexOptions()?.input).toContain('Issue updated');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.arrayContaining(['resume', '--last']),
+      expect.objectContaining({
+        input: expect.stringContaining('Issue updated'),
+      })
+    );
   });
 
   test('edited issue uses template edit context when no comment', async () => {
@@ -424,8 +444,20 @@ describe('Codex Worker action', () => {
     await runAction();
     await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
 
-    expect(getCodexOptions()?.input).toContain('Issue updated: https://example.com/issues/19');
-    expect(getCodexOptions()?.input).toContain('Continue the existing thread; do not restart.');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.any(Array),
+      expect.objectContaining({
+        input: expect.stringContaining('Issue updated: https://example.com/issues/19'),
+      })
+    );
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.any(Array),
+      expect.objectContaining({
+        input: expect.stringContaining('Continue the existing thread; do not restart.'),
+      })
+    );
   });
 
   test('uses model and reasoning effort when provided', async () => {
@@ -438,8 +470,16 @@ describe('Codex Worker action', () => {
     await runAction();
     await waitFor(() => octokit.rest.issues.createComment.mock.calls.length === 1);
 
-    expect(getCodexArgs()).toEqual(expect.arrayContaining(['--model', 'gpt-test']));
-    expect(getCodexArgs()).toEqual(expect.arrayContaining(['-c', 'model_reasoning_effort=low']));
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.arrayContaining(['--model', 'gpt-test']),
+      expect.any(Object)
+    );
+    expect(exec.exec).toHaveBeenCalledWith(
+      'codex',
+      expect.arrayContaining(['-c', 'model_reasoning_effort=low']),
+      expect.any(Object)
+    );
   });
 
   test('handles artifact download failure', async () => {
