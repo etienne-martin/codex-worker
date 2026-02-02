@@ -250,6 +250,25 @@ describe('Codex Worker action', () => {
     expect(octokit.rest.issues.createComment).not.toHaveBeenCalled();
   });
 
+  test('skips stale edited issue without posting', async () => {
+    setInputs({ issue_number: '25' });
+    setContext({
+      action: 'edited',
+      issue: { title: 'Old title', body: 'Old body' },
+    });
+
+    const octokit = createOctokit({
+      issueTitle: 'Current title',
+      issueBody: 'Current body',
+    });
+    mockGetOctokit.mockReturnValue(octokit);
+
+    await runAction();
+    await waitFor(() => exec.exec.mock.calls.length > 0);
+
+    expect(octokit.rest.issues.createComment).not.toHaveBeenCalled();
+  });
+
   test('adds edited comment context to prompt', async () => {
     setInputs({ issue_number: '15', comment_id: '101' });
     setContext({ action: 'edited', comment: { body: 'Updated comment body' } });
