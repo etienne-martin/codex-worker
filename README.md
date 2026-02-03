@@ -36,7 +36,7 @@ Because you can attach `action-agent` to any workflow trigger and provide a tail
 ## Permissions (job-level)
 
 This action relies on the workflow `GITHUB_TOKEN`. Grant only what you need at the job level.
-See GitHub docs: [Permissions for GITHUB_TOKEN](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
+See GitHub documentation for [permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
 
 Common permissions:
 - `issues: write` to post issue comments (including PR conversation comments).
