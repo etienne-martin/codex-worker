@@ -180,7 +180,7 @@ jobs:
 When `resume: true` and the event is tied to an issue or pull request, action-agent:
 - Downloads the latest Workflow Artifact for that thread (`action-agent-issue-<n>` or `action-agent-pr-<n>`).
 - Restores it into `~/.codex` before running Codex.
-- Uploads the updated `~/.codex` after the run (with `auth.json` and `tmp/` removed).
+- Uploads the updated session state after the run.
 
 Notes:
 - Resume is blocked on public repositories (the action throws).
