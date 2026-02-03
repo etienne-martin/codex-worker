@@ -29968,25 +29968,26 @@ exports.bootstrapCli = bootstrapCli;
 /***/ }),
 
 /***/ 2246:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.postComment = void 0;
-const core_1 = __importDefault(__nccwpck_require__(7484));
-const github_1 = __importDefault(__nccwpck_require__(3228));
+const core_1 = __nccwpck_require__(7484);
+const github_1 = __nccwpck_require__(3228);
 const github_context_1 = __nccwpck_require__(8886);
 const postComment = async (message) => {
-    const { owner, repo } = github_1.default.context.repo;
-    const githubToken = core_1.default.getInput('github_token', { required: true });
-    await github_1.default.getOctokit(githubToken).rest.issues.createComment({
+    const issueNumber = (0, github_context_1.getIssueNumber)();
+    if (!issueNumber) {
+        return;
+    }
+    const { owner, repo } = github_1.context.repo;
+    const githubToken = (0, core_1.getInput)('github_token', { required: true });
+    await (0, github_1.getOctokit)(githubToken).rest.issues.createComment({
         owner,
         repo,
-        issue_number: (0, github_context_1.getIssueNumber)(),
+        issue_number: issueNumber,
         body: message,
     });
 };
@@ -29996,23 +29997,22 @@ exports.postComment = postComment;
 /***/ }),
 
 /***/ 8886:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getIssueNumber = void 0;
-const github_1 = __importDefault(__nccwpck_require__(3228));
+const github_1 = __nccwpck_require__(3228);
 const getIssueNumber = () => {
-    const { issue, pull_request } = github_1.default.context.payload;
-    if (issue?.number)
+    const { issue, pull_request } = github_1.context.payload;
+    if (issue?.number) {
         return issue.number;
-    if (pull_request?.number)
+    }
+    if (pull_request?.number) {
         return pull_request.number;
-    throw new Error("Missing issue number");
+    }
+    return null;
 };
 exports.getIssueNumber = getIssueNumber;
 
@@ -30024,11 +30024,41 @@ exports.getIssueNumber = getIssueNumber;
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(7484));
+const core = __importStar(__nccwpck_require__(7484));
 const codex_1 = __nccwpck_require__(9724);
 const comment_1 = __nccwpck_require__(2246);
 const input_1 = __nccwpck_require__(3599);
@@ -30039,7 +30069,7 @@ const main = async () => {
     }
     catch (error) {
         const message = `action-agent failed: ${error instanceof Error ? error.message : String(error)}`;
-        core_1.default.setFailed(message);
+        core.setFailed(message);
         await (0, comment_1.postComment)(message);
     }
 };

@@ -1,15 +1,19 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import { getInput } from '@actions/core';
+import { getOctokit, context } from '@actions/github';
 import { getIssueNumber } from './github-context';
 
 export const postComment = async (message: string): Promise<void> => {
-  const { owner, repo } = github.context.repo;
-  const githubToken = core.getInput('github_token', { required: true });
+  const issueNumber = getIssueNumber();
+  if (!issueNumber) {
+    return;
+  }
+  const { owner, repo } = context.repo;
+  const githubToken = getInput('github_token', { required: true });
 
-  await github.getOctokit(githubToken).rest.issues.createComment({
+  await getOctokit(githubToken).rest.issues.createComment({
     owner,
     repo,
-    issue_number: getIssueNumber(),
+    issue_number: issueNumber,
     body: message,
   });
 };

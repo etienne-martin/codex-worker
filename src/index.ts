@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import { bootstrapCli } from './codex';
 import { postComment } from './comment';
 import { readInputs } from './input';
