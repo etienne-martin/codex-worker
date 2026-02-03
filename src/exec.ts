@@ -11,7 +11,7 @@ const buildCommandError = (
   const trimmedStdout = stdout.trim();
   const trimmedStderr = stderr.trim();
   const details = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
-  const base = `Command failed: ${[command, ...args].join(' ')}`;
+  const base = `Command failed: \n${[command, ...args].join(' ')}`;
   return details ? `${base}\n${details}` : `${base} (exit code ${exitCode})`;
 };
 

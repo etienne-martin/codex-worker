@@ -29959,13 +29959,12 @@ const core_1 = __nccwpck_require__(7484);
 const github_1 = __nccwpck_require__(3228);
 const github_context_1 = __nccwpck_require__(8886);
 const postComment = async (message) => {
-    const issueNumber = (0, github_context_1.getIssueNumber)();
     const { owner, repo } = github_1.context.repo;
     const githubToken = (0, core_1.getInput)('github_token', { required: true });
     await (0, github_1.getOctokit)(githubToken).rest.issues.createComment({
         owner,
         repo,
-        issue_number: issueNumber,
+        issue_number: (0, github_context_1.getIssueNumber)(),
         body: message,
     });
 };
@@ -29986,7 +29985,7 @@ const buildCommandError = (command, args, stdout, stderr, exitCode) => {
     const trimmedStdout = stdout.trim();
     const trimmedStderr = stderr.trim();
     const details = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
-    const base = `Command failed: ${[command, ...args].join(' ')}`;
+    const base = `Command failed: \n${[command, ...args].join(' ')}`;
     return details ? `${base}\n${details}` : `${base} (exit code ${exitCode})`;
 };
 const runCommand = async (command, args, options = {}) => {
@@ -31970,6 +31969,7 @@ const main = async () => {
     try {
         const { cliVersion, apiKey } = (0, input_1.readInputs)();
         await (0, codex_1.bootstrapCli)({ version: cliVersion, apiKey });
+        throw new Error("Some error");
     }
     catch (error) {
         const message = `action-agent failed: ${error instanceof Error ? error.message : String(error)}`;
