@@ -47,6 +47,18 @@ Common permissions:
 If you want the agent to open PRs, also enable the repo setting:
 Settings -> Actions -> Workflow permissions -> "Allow GitHub Actions to create and approve pull requests."
 
+## Resume (persistent sessions)
+
+When `resume: true` and the event is tied to an issue or pull request, action-agent:
+- Downloads the latest Workflow Artifact for that thread (`action-agent-issue-<n>` or `action-agent-pr-<n>`).
+- Restores it into `~/.codex` before running Codex.
+- Uploads the updated session state after the run.
+
+Notes:
+- Resume is blocked on public repositories (the action throws).
+- Resume requires `actions: read` to list/download artifacts.
+- Artifact retention is controlled by your repo/org settings (see [Workflow Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts)).
+
 ## GitHub MCP (how the agent talks to GitHub)
 
 This action configures the GitHub MCP server for Codex and passes `GITHUB_TOKEN` to the Codex process.
@@ -175,18 +187,6 @@ jobs:
           github_token: ${{ github.token }}
           prompt: ${{ inputs.prompt }}
 ```
-
-## Resume (persistent sessions)
-
-When `resume: true` and the event is tied to an issue or pull request, action-agent:
-- Downloads the latest Workflow Artifact for that thread (`action-agent-issue-<n>` or `action-agent-pr-<n>`).
-- Restores it into `~/.codex` before running Codex.
-- Uploads the updated session state after the run.
-
-Notes:
-- Resume is blocked on public repositories (the action throws).
-- Resume requires `actions: read` to list/download artifacts.
-- Artifact retention is controlled by your repo/org settings (see [Workflow Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts)).
 
 ## Safety model
 
