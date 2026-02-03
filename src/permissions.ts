@@ -3,6 +3,12 @@ import { inputs } from './input';
 
 const { actor, repo: { owner, repo } } = context;
 
+export const isPermissionError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object' || !('status' in error)) return false;
+  const status = (error as { status?: number }).status;
+  return status === 403;
+};
+
 const isNotFoundError = (error: unknown): boolean => {
   return Boolean(error && typeof error === 'object' && 'status' in error && (error as { status?: number }).status === 404);
 };

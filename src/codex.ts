@@ -5,6 +5,7 @@ import { context } from '@actions/github';
 import { downloadLatestArtifact, uploadArtifact } from './artifacts';
 import { runCommand } from './exec';
 import { inputs } from './input';
+import { isPermissionError } from './permissions';
 
 const CODEX_VERSION = '0.93.0';
 const CODEX_DIR = path.join(os.homedir(), '.codex');
@@ -17,7 +18,14 @@ const shouldResume = (): boolean =>
 const restoreSession = async () => {
   if (!shouldResume()) return;
   ensureDir(CODEX_DIR);
-  await downloadLatestArtifact(inputs.githubToken, CODEX_DIR);
+  try {
+    await downloadLatestArtifact(inputs.githubToken, CODEX_DIR);
+  } catch (error) {
+    if (isPermissionError(error)) {
+      throw new Error('Resume is enabled but the workflow lacks `actions: read` permission.');
+    }
+    throw error;
+  }
 };
 
 const persistSession = async () => {

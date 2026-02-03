@@ -20,7 +20,7 @@ action-agent failed:
 \`\`\`
 ${message}
 \`\`\`
-    `);
+    `.trim());
   }
 };
 

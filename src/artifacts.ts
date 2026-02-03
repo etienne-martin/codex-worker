@@ -23,6 +23,7 @@ const listArtifactsByName = async (githubToken: string): Promise<RepoArtifact[]>
     per_page: 100,
     name: getArtifactName(),
   });
+
   return artifacts as RepoArtifact[];
 };
 
