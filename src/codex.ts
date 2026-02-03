@@ -84,7 +84,7 @@ export const runCodex = async (prompt: string) => {
       '--last',
       '--skip-git-repo-check',
       ...(inputs.model ? ['--model', inputs.model] : []),
-      ...(inputs.reasoningEffort ? ['--reasoning-effort', inputs.reasoningEffort] : []),
+      ...(inputs.reasoningEffort ? ['-c', `model_reasoning_effort=${inputs.reasoningEffort}`] : []),
       prompt,
     ],
     { env: { ...process.env, [MCP_TOKEN_ENV_NAME]: inputs.githubToken } },
