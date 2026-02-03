@@ -54,5 +54,5 @@ export const teardown = async (): Promise<void> => {
 };
 
 export const runCodex = async (prompt: string): Promise<void> => {
-  await runCommand('codex', ['exec', 'resume', '--last', '--skip-git-repo-check', prompt]);
+  await runCommand('codex', ['exec', 'resume', '--last', '--skip-git-repo-check', prompt], {}, 'stderr');
 };

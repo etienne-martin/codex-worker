@@ -1,5 +1,5 @@
 import { getExecOutput } from '@actions/exec';
-import type { ExecOptions } from '@actions/exec';
+import type { ExecListeners, ExecOptions } from '@actions/exec';
 
 const buildCommandError = (
   command: string,
@@ -15,8 +15,27 @@ const buildCommandError = (
   return details ? `${base}\n\n${details}` : `${base} (exit code ${exitCode})`;
 };
 
-export const runCommand = async (command: string, args: string[], options: ExecOptions = {}): Promise<void> => {
-  const result = await getExecOutput(command, args, { ...options, ignoreReturnCode: true });
+type StreamMode = 'stdout' | 'stderr' | 'both';
+
+const buildListeners = (stream: StreamMode): ExecListeners => {
+  return {
+    stdout: stream === 'stdout' || stream === 'both' ? (data) => process.stdout.write(data) : undefined,
+    stderr: stream === 'stderr' || stream === 'both' ? (data) => process.stderr.write(data) : undefined,
+  };
+};
+
+export const runCommand = async (
+  command: string,
+  args: string[],
+  options: ExecOptions = {},
+  stream: StreamMode = 'both',
+): Promise<void> => {
+  const result = await getExecOutput(command, args, {
+    ...options,
+    ignoreReturnCode: true,
+    silent: true,
+    listeners: buildListeners(stream),
+  });
 
   if (result.exitCode !== 0) {
     throw new Error(buildCommandError(command, args, result.stdout, result.stderr, result.exitCode));
