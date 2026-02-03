@@ -78,7 +78,15 @@ export const teardown = async () => {
 export const runCodex = async (prompt: string) => {
   await runCommand(
     'codex',
-    ['exec', 'resume', '--last', '--skip-git-repo-check', prompt],
+    [
+      'exec',
+      'resume',
+      '--last',
+      '--skip-git-repo-check',
+      ...(inputs.model ? ['--model', inputs.model] : []),
+      ...(inputs.reasoningEffort ? ['--reasoning-effort', inputs.reasoningEffort] : []),
+      prompt,
+    ],
     { env: { ...process.env, [MCP_TOKEN_ENV_NAME]: inputs.githubToken } },
     'stderr',
   );

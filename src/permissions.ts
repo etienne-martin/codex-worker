@@ -3,9 +3,13 @@ import { inputs } from './input';
 
 const { actor, repo: { owner, repo } } = context;
 
+const isErrorWithStatus = (error: unknown): error is { status?: number } => {
+  return Boolean(error && typeof error === 'object' && 'status' in error);
+};
+
 const getErrorStatus = (error: unknown): number | undefined => {
-  if (!error || typeof error !== 'object' || !('status' in error)) return undefined;
-  const status = (error as { status?: number }).status;
+  if (!isErrorWithStatus(error)) return undefined;
+  const { status } = error;
   return typeof status === 'number' ? status : undefined;
 };
 
