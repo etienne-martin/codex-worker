@@ -3,7 +3,7 @@
 Run the [OpenAI Codex CLI](https://github.com/openai/codex) as a GitHub Action for any [workflow trigger](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows) (issues, pull requests, comments, schedule, workflow_dispatch, etc.).
 
 This action is intentionally thin:
-- Installs a pinned [`@openai/codex`](https://www.npmjs.com/package/@openai/codex) CLI version.
+- Installs a pinned `@openai/codex` CLI version.
 - Logs in with your `api_key`.
 - Configures the [GitHub MCP server](https://github.com/github/github-mcp-server) so Codex can interact with GitHub using the workflow `github_token` (scoped by your workflow `permissions`).
 - Optionally resumes a per-issue / per-PR Codex session via GitHub [Workflow Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts).
