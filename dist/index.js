@@ -29928,7 +29928,7 @@ function wrappy (fn, cb) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.bootstrapCli = void 0;
+exports.runCodex = exports.bootstrapCli = void 0;
 const exec_1 = __nccwpck_require__(3190);
 const CODEX_VERSION = "0.93.0";
 const install = async (version = CODEX_VERSION) => {
@@ -29944,6 +29944,10 @@ const bootstrapCli = async ({ version, apiKey }) => {
     await login(apiKey);
 };
 exports.bootstrapCli = bootstrapCli;
+const runCodex = async (prompt) => {
+    await (0, exec_1.runCommand)('codex', ['exec', prompt]);
+};
+exports.runCodex = runCodex;
 
 
 /***/ }),
@@ -31966,6 +31970,7 @@ const main = async () => {
     try {
         const { cliVersion, apiKey } = (0, input_1.readInputs)();
         await (0, codex_1.bootstrapCli)({ version: cliVersion, apiKey });
+        await (0, codex_1.runCodex)('say hello');
     }
     catch (error) {
         const message = error instanceof Error ? error.message : String(error);

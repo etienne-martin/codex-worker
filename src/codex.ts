@@ -16,3 +16,7 @@ export const bootstrapCli = async ({ version, apiKey }: { version?: string; apiK
   await install(version);
   await login(apiKey);
 };
+
+export const runCodex = async (prompt: string): Promise<void> => {
+  await runCommand('codex', ['exec', prompt]);
+};
