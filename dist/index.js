@@ -29927,48 +29927,34 @@ function wrappy (fn, cb) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.bootstrapCli = void 0;
-const exec = __importStar(__nccwpck_require__(5236));
+const exec_1 = __importDefault(__nccwpck_require__(5236));
 const CODEX_VERSION = "0.93.0";
+const buildCommandError = (command, args, stdout, stderr, exitCode) => {
+    const trimmedStdout = stdout.trim();
+    const trimmedStderr = stderr.trim();
+    const details = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
+    const base = `Command failed: ${[command, ...args].join(' ')}`;
+    if (!details) {
+        return `${base} (exit code ${exitCode})`;
+    }
+    return `${base}\n${details}`;
+};
+const runCommand = async (command, args, options = {}) => {
+    const result = await exec_1.default.getExecOutput(command, args, { ...options, ignoreReturnCode: true });
+    if (result.exitCode !== 0) {
+        throw new Error(buildCommandError(command, args, result.stdout, result.stderr, result.exitCode));
+    }
+};
 const install = async (version = CODEX_VERSION) => {
-    await exec.exec('npm', ['install', '-g', `@openai/codex@${version}`]);
+    await runCommand('npm', ['install', '-g', `@openai/codex@${version}`]);
 };
 const login = async (apiKey) => {
-    await exec.exec('bash', ['-lc', 'printenv OPENAI_API_KEY | codex login --with-api-key'], {
+    await runCommand('bash', ['-lc', 'printenv OPENAI_API_KEY | codex login --with-api-key'], {
         env: { ...process.env, OPENAI_API_KEY: apiKey },
     });
 };
@@ -29986,60 +29972,25 @@ exports.bootstrapCli = bootstrapCli;
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.postErrorComment = void 0;
-const github = __importStar(__nccwpck_require__(3228));
+exports.postComment = void 0;
+const core_1 = __importDefault(__nccwpck_require__(7484));
+const github_1 = __importDefault(__nccwpck_require__(3228));
 const github_context_1 = __nccwpck_require__(8886);
-const postErrorComment = async (githubToken, message) => {
-    if (!githubToken) {
-        return;
-    }
-    const subjectNumber = (0, github_context_1.getSubjectNumber)();
-    if (!subjectNumber) {
-        return;
-    }
-    const { owner, repo } = (0, github_context_1.getRepo)();
-    await github.getOctokit(githubToken).rest.issues.createComment({
+const postComment = async (message) => {
+    const { owner, repo } = github_1.default.context.repo;
+    const githubToken = core_1.default.getInput('github_token', { required: true });
+    await github_1.default.getOctokit(githubToken).rest.issues.createComment({
         owner,
         repo,
-        issue_number: subjectNumber,
+        issue_number: (0, github_context_1.getIssueNumber)(),
         body: message,
     });
 };
-exports.postErrorComment = postErrorComment;
+exports.postComment = postComment;
 
 
 /***/ }),
@@ -30049,57 +30000,21 @@ exports.postErrorComment = postErrorComment;
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getSubjectNumber = exports.getRepo = exports.getPayload = void 0;
-const github = __importStar(__nccwpck_require__(3228));
-const getPayload = () => github.context.payload;
-exports.getPayload = getPayload;
-const getRepo = () => github.context.repo;
-exports.getRepo = getRepo;
-const getSubjectNumber = () => {
-    const payload = getPayload();
-    if (payload.issue?.number) {
-        return payload.issue.number;
-    }
-    if (payload.pull_request?.number) {
-        return payload.pull_request.number;
-    }
-    return null;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.getSubjectNumber = getSubjectNumber;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getIssueNumber = void 0;
+const github_1 = __importDefault(__nccwpck_require__(3228));
+const getIssueNumber = () => {
+    const { issue, pull_request } = github_1.default.context.payload;
+    if (issue?.number)
+        return issue.number;
+    if (pull_request?.number)
+        return pull_request.number;
+    throw new Error("Missing issue number");
+};
+exports.getIssueNumber = getIssueNumber;
 
 
 /***/ }),
@@ -30109,67 +30024,23 @@ exports.getSubjectNumber = getSubjectNumber;
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(7484));
+const core_1 = __importDefault(__nccwpck_require__(7484));
 const codex_1 = __nccwpck_require__(9724);
 const comment_1 = __nccwpck_require__(2246);
 const input_1 = __nccwpck_require__(3599);
-const getErrorMessage = (error) => {
-    if (error instanceof Error && error.message) {
-        return error.message;
-    }
-    return String(error);
-};
-const readGithubToken = () => {
-    try {
-        return (0, input_1.readInputs)().githubToken;
-    }
-    catch {
-        return core.getInput('github_token');
-    }
-};
 const main = async () => {
     try {
         const { cliVersion, apiKey } = (0, input_1.readInputs)();
         await (0, codex_1.bootstrapCli)({ version: cliVersion, apiKey });
     }
     catch (error) {
-        const message = `action-agent failed: ${getErrorMessage(error)}`;
-        core.setFailed(message);
-        await (0, comment_1.postErrorComment)(readGithubToken(), message);
+        const message = `action-agent failed: ${error instanceof Error ? error.message : String(error)}`;
+        core_1.default.setFailed(message);
+        await (0, comment_1.postComment)(message);
     }
 };
 void main();
@@ -30182,48 +30053,18 @@ void main();
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readInputs = void 0;
-const core = __importStar(__nccwpck_require__(7484));
+const core_1 = __importDefault(__nccwpck_require__(7484));
 const readInputs = () => ({
-    apiKey: core.getInput('api_key', { required: true }),
-    githubToken: core.getInput('github_token', { required: true }),
-    cliVersion: core.getInput('cli_version') || undefined,
-    model: core.getInput('model'),
-    reasoningEffort: core.getInput('reasoning_effort'),
+    apiKey: core_1.default.getInput('api_key', { required: true }),
+    githubToken: core_1.default.getInput('github_token', { required: true }),
+    cliVersion: core_1.default.getInput('cli_version') || undefined,
+    model: core_1.default.getInput('model'),
+    reasoningEffort: core_1.default.getInput('reasoning_effort'),
 });
 exports.readInputs = readInputs;
 
