@@ -18,11 +18,7 @@ const buildCommandError = (
     return normalized.length > 160 ? '<omitted>' : normalized;
   };
   const formattedArgs = args.map(formatArg);
-  const sections = [
-    trimmedStdout ? `stdout:\n${trimmedStdout}` : '',
-    trimmedStderr ? `stderr:\n${trimmedStderr}` : '',
-  ].filter(Boolean);
-  const details = sections.join('\n\n');
+  const details = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n\n');
   const base = `Command failed: ${[command, ...formattedArgs].join(' ')}`;
   return details ? `${base}\n\n${details}` : `${base} (exit code ${exitCode})`;
 };

@@ -9,11 +9,23 @@ import { isPermissionError } from './permissions';
 
 const CODEX_VERSION = '0.93.0';
 const CODEX_DIR = path.join(os.homedir(), '.codex');
+const MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+const MCP_TOKEN_ENV = 'GITHUB_TOKEN';
 
 const ensureDir = (dir: string) => fs.mkdirSync(dir, { recursive: true });
+const configPath = () => path.join(CODEX_DIR, 'config.toml');
 
 const shouldResume = (): boolean =>
   inputs.resume && Boolean(context.payload.issue || context.payload.pull_request);
+
+const configureMcp = () => {
+  ensureDir(CODEX_DIR);
+  process.env[MCP_TOKEN_ENV] = inputs.githubToken;
+  fs.writeFileSync(
+    configPath(),
+    `[mcp_servers.github]\nurl = "${MCP_SERVER_URL}"\nbearer_token_env_var = "${MCP_TOKEN_ENV}"\n`,
+  );
+};
 
 const restoreSession = async () => {
   if (!shouldResume()) return;
@@ -47,6 +59,7 @@ const login = async () => {
 
 export const bootstrap = async () => {
   await install();
+  configureMcp();
   await restoreSession();
   await login();
 };

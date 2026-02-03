@@ -8,6 +8,7 @@ GitHub Action (Node) that runs Codex CLI from issues and issue comments.
 - Optionally resumes Codex session state per issue via [Workflow Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts).
 - Posts responses back to the issue.
 - Can create branches/commits and open PRs when instructed.
+- Optional GitHub MCP integration for repo/issue/PR access from Codex.
 
 ## Requirements
 
@@ -21,7 +22,8 @@ GitHub Action (Node) that runs Codex CLI from issues and issue comments.
 - `contents: write` — push branches/commits back to the repo.
 - `issues: write` — add reactions and post issue comments.
 - `pull-requests: write` — create draft PRs from branches.
-- `actions: read` — list/download artifacts for session restore (only if resume is enabled).
+- `actions: read` — list/download artifacts for session restore (only if `resume` is enabled).
+- `issues: write` — required if you want error comments to post back to issues/PRs.
 
 ## Quick start (caller workflow)
 
@@ -61,4 +63,5 @@ jobs:
 
 - The action runs on an ephemeral runner. It tells Codex to commit and push any repo changes so work persists between runs.
 - Session artifacts are handled automatically when resume is enabled; follow‑up comments resume from the latest saved session. Artifacts are retained for 7 days, so conversations expire after that retention window.
+- GitHub MCP uses the same `github_token` you already provide to the action.
 - `AGENTS.md` (if present in the repo root) is loaded automatically and will influence agent behavior.
