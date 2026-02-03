@@ -62,6 +62,6 @@ jobs:
 ## Notes
 
 - The action runs on an ephemeral runner. It tells Codex to commit and push any repo changes so work persists between runs.
-- Session artifacts are handled automatically when resume is enabled; follow‑up comments resume from the latest saved session. Artifacts are retained for 7 days, so conversations expire after that retention window.
+- Session artifacts are handled automatically when resume is enabled on private repos; resume is disabled on public repos to avoid exposing artifacts. Artifacts are retained for 7 days, so conversations expire after that retention window.
 - GitHub MCP uses the same `github_token` you already provide to the action.
 - `AGENTS.md` (if present in the repo root) is loaded automatically and will influence agent behavior.
