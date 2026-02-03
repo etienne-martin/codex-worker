@@ -4,13 +4,13 @@ import { bootstrap, runCodex, teardown } from './codex';
 import { postComment } from './comment';
 import { getIssueNumber, getSubjectType } from './context';
 import { readInputs } from './input';
-import { ensureActorHasWriteAccess } from './permissions';
+import { ensurePermission } from './permissions';
 
 const main = async (): Promise<void> => {
   try {
     const { apiKey, githubToken } = readInputs();
 
-    await ensureActorHasWriteAccess(githubToken);
+    await ensurePermission(githubToken);
     await bootstrap({ apiKey, githubToken });
 
     await runCodex([

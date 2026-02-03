@@ -26,7 +26,7 @@ const fetchPermission = async (githubToken: string): Promise<string> => {
   }
 };
 
-export const ensureActorHasWriteAccess = async (githubToken: string): Promise<void> => {
+export const ensurePermission = async (githubToken: string): Promise<void> => {
   const permission = await fetchPermission(githubToken);
 
   if (!(["admin", "write", "maintain"].includes(permission))) {
