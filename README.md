@@ -70,7 +70,7 @@ This action configures the GitHub MCP server for Codex and passes `GITHUB_TOKEN`
 
 All examples assume you created a secret named `OPENAI_API_KEY`.
 
-### 1) Issue assistant
+### Issue assistant
 
 Auto-triage issue threads: ask clarifying questions, detect duplicates, and keep context across follow-ups with `resume: true`.
 
@@ -101,7 +101,7 @@ jobs:
             If it's a duplicate, link the canonical issue and close this one.
 ```
 
-### 2) PR reviewer
+### PR reviewer
 
 Review pull requests, respond to PR comments, and open follow-up PRs when you can fix something safely.
 
@@ -137,7 +137,7 @@ jobs:
             If you can fix something safely, open a follow-up PR with the change.
 ```
 
-### 3) Scheduled agent
+### Scheduled agent
 
 Run periodic maintenance or reporting (e.g. a daily PR triage summary).
 
@@ -163,7 +163,7 @@ jobs:
             Summarize the top 5 oldest PRs and open a single issue titled "Daily PR triage" with next steps.
 ```
 
-### 4) Manual dispatch
+### Manual dispatch
 
 Kick off an agent run on demand with a one-off prompt (release notes, repo audit, triage a label, etc).
 
