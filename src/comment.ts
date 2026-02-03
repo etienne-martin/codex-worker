@@ -26,8 +26,8 @@ export const postComment = async (comment: string): Promise<void> => {
 export const postErrorComment = async (comment: string): Promise<void> => {
   await postComment(`
 action-agent failed:
-\`\`\`
+\`\`\`\`
 ${comment}
-\`\`\`
-    `.trim())
+\`\`\`\`
+    `.trim());
 };

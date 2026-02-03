@@ -19,7 +19,6 @@ const main = async (): Promise<void> => {
     if (isIssueOrPullRequest()) {
       await postErrorComment(message);
     }
-
   }
 };
 
