@@ -33,7 +33,7 @@ Because you can attach `action-agent` to any workflow trigger and provide a tail
 - Use `prompt` for per-workflow instructions (triage rules, review style, escalation policy, etc).
 - If your repo has an `AGENTS.md` at the repo root, Codex will pick it up and use it as persistent guidance across runs (see this repo's [AGENTS.md](AGENTS.md) for an example).
 
-## Permissions (job-level)
+## Permissions
 
 This action relies on the workflow `GITHUB_TOKEN`. Grant only what you need at the job level.
 See GitHub documentation for [permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
@@ -47,7 +47,7 @@ Common permissions:
 If you want the agent to open PRs, also enable the repo setting:
 Settings -> Actions -> Workflow permissions -> "Allow GitHub Actions to create and approve pull requests."
 
-## Resume (persistent sessions)
+## Persistent sessions
 
 When `resume: true` and the event is tied to an issue or pull request, action-agent:
 - Downloads the latest Workflow Artifact for that thread (`action-agent-issue-<n>` or `action-agent-pr-<n>`).
