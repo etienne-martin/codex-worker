@@ -22,8 +22,8 @@ const persistSession = async (): Promise<void> => {
   await uploadArtifact(CODEX_DIR);
 };
 
-const install = async (version = CODEX_VERSION): Promise<void> => {
-  await runCommand('npm', ['install', '-g', `@openai/codex@${version}`]);
+const install = async (): Promise<void> => {
+  await runCommand('npm', ['install', '-g', `@openai/codex@${CODEX_VERSION}`]);
 };
 
 const login = async (apiKey: string): Promise<void> => {
@@ -33,15 +33,13 @@ const login = async (apiKey: string): Promise<void> => {
 };
 
 export const bootstrap = async ({
-  version,
   apiKey,
   githubToken,
 }: {
-  version?: string;
   apiKey: string;
   githubToken: string;
 }) => {
-  await install(version);
+  await install();
   await restoreSession(githubToken);
   await login(apiKey);
 };

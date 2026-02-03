@@ -14,10 +14,6 @@ inputs:
   api_key:
     description: Model provider API key
     required: true
-  cli_version:
-    description: CLI version
-    required: false
-    default: ""
   github_token:
     description: GitHub token used for API + gh
     required: true
