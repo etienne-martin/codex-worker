@@ -16,8 +16,8 @@ const main = async (): Promise<void> => {
       `Repo: ${context.repo.owner}/${context.repo.repo}`,
       `Event: ${context.eventName}`,
       `Subject: ${getSubjectType()} #${getIssueNumber()}`,
-      `Workspace: ${process.env.GITHUB_WORKSPACE || process.cwd()}`,
-      'Event path: $GITHUB_EVENT_PATH',
+      `Workspace: ${process.env.GITHUB_WORKSPACE}`,
+      `Event path: ${process.env.GITHUB_EVENT_PATH}`,
       'Act autonomously and take action only if it is useful.',
     ].join('\n'), githubToken);
   } catch (error) {
