@@ -45,6 +45,7 @@ const main = async (): Promise<void> => {
   const { cliVersion, apiKey, githubToken } = readInputs();
   const artifactName = getArtifactName();
   const codexDir = setCodexEnv();
+  exportVariable('OPENAI_API_KEY', apiKey);
   try {
     await restoreArtifact(githubToken, artifactName, codexDir);
     await bootstrapCli({ version: cliVersion, apiKey });
