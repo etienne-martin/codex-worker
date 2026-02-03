@@ -17,6 +17,8 @@ const restoreSession = async (githubToken: string): Promise<void> => {
 };
 
 const persistSession = async (): Promise<void> => {
+  fs.rmSync(path.join(CODEX_DIR, 'auth.json'), { force: true });
+  fs.rmSync(path.join(CODEX_DIR, 'tmp'), { recursive: true, force: true });
   await uploadArtifact(CODEX_DIR);
 };
 
