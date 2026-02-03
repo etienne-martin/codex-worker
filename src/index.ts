@@ -7,7 +7,7 @@ const main = async (): Promise<void> => {
   try {
     const { cliVersion, apiKey, githubToken } = readInputs();
     await bootstrap({ version: cliVersion, apiKey, githubToken });
-    await runCodex('say hello');
+    await runCodex('tell me what I asked you before');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
