@@ -2,13 +2,14 @@ import { setFailed } from '@actions/core';
 import { bootstrap, runCodex, teardown } from './codex';
 import { postErrorComment } from './github/comment';
 import { isIssueOrPullRequest } from './github/context';
-import { ensurePermission } from './github/permissions';
+import { ensureWriteAccess, ensureTrustedAuthorAssociation } from './github/permissions';
 import { buildPrompt } from './prompt';
 
 const main = async (): Promise<void> => {
   try {
     await Promise.all([
-      ensurePermission(),
+      ensureWriteAccess(),
+      ensureTrustedAuthorAssociation(),
       bootstrap(),
     ]);
     await runCodex(buildPrompt());

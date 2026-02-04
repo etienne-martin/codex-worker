@@ -24,10 +24,8 @@ export const postComment = async (comment: string): Promise<void> => {
 };
 
 export const postErrorComment = async (comment: string): Promise<void> => {
-  await postComment(`
-action-agent failed:
-\`\`\`\`
-${comment}
-\`\`\`\`
-    `.trim());
+  const { owner, repo } = context.repo;
+  const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+
+  await postComment(`action-agent failed. See workflow run: ${runUrl}`);
 };

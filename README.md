@@ -200,11 +200,12 @@ jobs:
           prompt: ${{ inputs.prompt }}
 ```
 
-## Safety model
+## Security
 
 - The action refuses to run unless the triggering `github.actor` has write access (admin/write/maintain) to the repo.
+- The action also blocks runs when the content author association is not OWNER, MEMBER, or COLLABORATOR (when present in the payload).
+- GitHub side effects are constrained by the workflow `permissions` you grant to `GITHUB_TOKEN` (grant the minimum needed).
 - Codex runs with its default `codex exec` sandbox settings.
-- GitHub side effects are constrained by the workflow `permissions` you grant to `GITHUB_TOKEN`.
 
 ## Troubleshooting
 

@@ -24,10 +24,32 @@ const fetchPermission = async (): Promise<string> => {
   }
 };
 
-export const ensurePermission = async (): Promise<void> => {
+const getAuthorAssociation = (): string | null => {
+  const { comment, issue, pull_request } = context.payload;
+
+  if (comment?.author_association) return comment.author_association;
+  if (pull_request?.author_association) return pull_request.author_association;
+  if (issue?.author_association) return issue.author_association;
+
+  return null;
+};
+
+export const ensureWriteAccess = async (): Promise<void> => {
   const permission = await fetchPermission();
 
   if (!(["admin", "write", "maintain"].includes(permission))) {
     throw new Error(`Actor '${actor}' must have write access to ${owner}/${repo}. Detected permission: '${permission}'.`);
+  }
+};
+
+export const ensureTrustedAuthorAssociation = async () => {
+  const association = getAuthorAssociation();
+
+  if (!association) return;
+
+  if (!['OWNER', 'MEMBER', 'COLLABORATOR'].includes(association)) {
+    throw new Error(
+      `Author association on ${owner}/${repo} must be OWNER, MEMBER, or COLLABORATOR. Detected: '${association}'.`,
+    );
   }
 };
