@@ -48,7 +48,7 @@ const restoreSession = async () => {
 
 const persistSession = async () => {
   if (!shouldResume()) return;
-  await uploadArtifact(CODEX_DIR, ['sessions/**', 'history.jsonl']);
+  await uploadArtifact(CODEX_DIR, ['sessions/**']);
 };
 
 const install = async () => {
