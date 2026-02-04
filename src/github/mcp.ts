@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import http from 'http';
 import { getOctokit } from '@actions/github';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -62,12 +62,20 @@ const createGitHubServer = (githubToken: string): McpServer => {
 
 const startGitHubMcpServer = async (githubToken: string) => {
   const transports = new Map<string, StreamableHTTPServerTransport>();
+  const authToken = randomBytes(32).toString('hex');
 
   const handleRequest = async (req: http.IncomingMessage, res: http.ServerResponse) => {
     const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+
     if (url.pathname !== '/mcp') {
       res.statusCode = 404;
       res.end('Not Found');
+      return;
+    }
+
+    if (url.searchParams.get('token') !== authToken) {
+      res.statusCode = 401;
+      res.end('Unauthorized');
       return;
     }
 
@@ -128,10 +136,6 @@ const startGitHubMcpServer = async (githubToken: string) => {
     res.end('Method Not Allowed');
   };
 
-  // TODO(high): This local HTTP MCP endpoint has no auth beyond localhost. In GitHub Actions,
-  // any process in the same job could hit 127.0.0.1:<port>/mcp and invoke GitHub API ops with
-  // the job token. Consider a shared secret header, unix socket binding, or restricting access
-  // to the Codex child process.
   const server = http.createServer((req, res) => {
     handleRequest(req, res).catch((error: unknown) => {
       if (res.headersSent) return;
@@ -162,7 +166,7 @@ const startGitHubMcpServer = async (githubToken: string) => {
   }
 
   return {
-    url: `http://127.0.0.1:${address.port}/mcp`,
+    url: `http://127.0.0.1:${address.port}/mcp?token=${authToken}`,
     close: async () => {
       await Promise.allSettled(Array.from(transports.values()).map((transport) => transport.close()));
       await new Promise<void>((resolve, reject) => {
