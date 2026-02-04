@@ -65,17 +65,12 @@ const login = async () => {
 };
 
 export const bootstrap = async () => {
-  await Promise.all([
-    install(),
-    restoreSession()
-  ]);
-  await configureMcp();
+  await Promise.all([install(), restoreSession(), configureMcp()]);
   await login();
 };
 
 export const teardown = async () => {
-  await mcpServer.close();
-  await persistSession();
+  await Promise.all([mcpServer.close(), persistSession()]);
 };
 
 export const runCodex = async (prompt: string) => {
