@@ -176,9 +176,9 @@ const startGitHubMcpServer = async () => {
 };
 
 export const githubMcpServer = (): RunningMcpServer => {
-  const serverPromise = startGitHubMcpServer();
+  const pendingServer = startGitHubMcpServer();
   return {
-    url: serverPromise.then((server) => server.url),
-    close: () => serverPromise.then((server) => server.close()),
+    url: pendingServer.then((server) => server.url),
+    close: () => pendingServer.then((server) => server.close()),
   };
 };
