@@ -7,12 +7,15 @@ import { runCommand } from './exec';
 import { githubMcpServer } from './github/mcp';
 import { inputs } from './github/input';
 import { isPermissionError } from './github/error';
+import { info } from "@actions/core";
 
 const CODEX_VERSION = '0.93.0';
 const CODEX_DIR = path.join(os.homedir(), '.codex');
 const CODEX_CONFIG_PATH = path.join(CODEX_DIR, 'config.toml');
 const CODEX_SESSIONS_PATH = path.join(CODEX_DIR, 'sessions');
 const mcpServer = githubMcpServer();
+
+export type ResumeStatus = 'skipped' | 'not_found' | 'restored';
 
 const ensureDir = (dir: string) => fs.mkdirSync(dir, { recursive: true });
 
@@ -31,11 +34,18 @@ const configureMcp = async () => {
   fs.writeFileSync(CODEX_CONFIG_PATH, await buildConfig());
 };
 
-const restoreSession = async () => {
-  if (!shouldResume()) return;
+const restoreSession = async (): Promise<ResumeStatus> => {
+  if (!shouldResume()) return 'skipped';
   ensureDir(CODEX_SESSIONS_PATH);
+
   try {
-    await downloadLatestArtifact(CODEX_SESSIONS_PATH);
+    if (await downloadLatestArtifact(CODEX_SESSIONS_PATH)) {
+      info('Restored previous session');
+      return 'restored';
+    } else {
+      info('No previous session found');
+      return 'not_found';
+    }
   } catch (error) {
     if (isPermissionError(error)) {
       throw new Error('Resume is enabled but the workflow lacks `actions: read` permission.');
@@ -61,13 +71,15 @@ const login = async () => {
   );
 };
 
-export const bootstrap = async () => {
-  await Promise.all([
-    install(),
+export const bootstrap = async (): Promise<{ resumeStatus: ResumeStatus }> => {
+  const [resumeStatus] = await Promise.all([
     restoreSession(),
+    install(),
     configureMcp(),
   ]);
   await login();
+
+  return { resumeStatus };
 };
 
 export const teardown = async () => {

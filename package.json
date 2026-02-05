@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "npm run typecheck && ncc build src/index.ts -o dist && cp src/PROMPT.md dist/PROMPT.md",
+    "build": "npm run typecheck && ncc build src/index.ts -o dist && cp src/PROMPT.md dist/PROMPT.md && cp src/PROMPT_RESUME.md dist/PROMPT_RESUME.md",
     "test": "jest"
   },
   "dependencies": {

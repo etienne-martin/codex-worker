@@ -9,8 +9,7 @@ const main = async () => {
   try {
     ensurePrivateRepo();
     await ensureWriteAccess();
-    await bootstrap();
-    await runCodex(buildPrompt());
+    await runCodex(buildPrompt(await bootstrap()));
     await teardown();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
