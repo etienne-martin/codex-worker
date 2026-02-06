@@ -1,0 +1,45 @@
+name: version-bump
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: pr-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  version-bump:
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.ref == 'develop' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Version bump via workflow-agent
+        uses: sudden-network/workflow-agent@v1
+        with:
+          agent_api_key: ${{ secrets.OPENAI_API_KEY }}
+          github_token: ${{ github.token }}
+          resume: true
+          prompt: |
+            Goal: keep the package.json version aligned with the impact of changes.
+
+            Review the PR changes and decide whether a version bump is needed:
+            - Breaking changes -> major.
+            - New backward compatible features -> minor.
+            - Backward compatible bug fixes, security fixes, dependency updates -> patch.
+            - Internal-only changes -> none.
+
+            If you recommend a bump:
+            - Comment on the PR with a short summary and rationale, plus the recommended bump: major|minor|patch.
+            - Include the current version and the proposed version in a diff-style code fence:
+              ```diff
+              - version: <current>
+              + version: <proposed>
+              ```
