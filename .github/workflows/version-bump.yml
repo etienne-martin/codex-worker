@@ -34,7 +34,7 @@ jobs:
             - Breaking changes -> major.
             - New backward compatible features -> minor.
             - Backward compatible bug fixes, security fixes, dependency updates -> patch.
-            - Internal-only changes -> none.
+            - Internal-only changes, no runtime changes -> none.
 
             If you recommend a bump:
             - Comment on the PR with a short summary explaining the reason for the bump.
@@ -43,3 +43,4 @@ jobs:
               - version: <current>
               + version: <proposed>
               ```
+            If you do not recommend a bump, do not comment.
