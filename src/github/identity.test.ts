@@ -36,12 +36,10 @@ describe('resolveTokenActor', () => {
     await expect(resolveTokenActor()).resolves.toBe('sudden-agent[bot]');
   });
 
-  it('throws when token actor is missing for non-workflow tokens', async () => {
+  it('defaults to workflow actor when token actor is missing', async () => {
     process.env.GITHUB_TOKEN = 'workflow-token';
     githubTokenMock = 'other-token';
 
-    await expect(resolveTokenActor()).rejects.toThrow(
-      'Missing github_token_actor input for non-workflow GitHub tokens.',
-    );
+    await expect(resolveTokenActor()).resolves.toBe(WORKFLOW_TOKEN_ACTOR);
   });
 });
