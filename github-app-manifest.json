@@ -1,18 +1,17 @@
 {
-  "name": "workflow-agent",
+  "name": "Workflow Agent",
   "url": "https://github.com/sudden-network/workflow-agent",
   "hook_attributes": {
-    "url": "https://example.com/github-app-webhook",
+    "url": "https://example.com/github/webhook",
     "active": false
   },
-  "description": "GitHub App for workflow-agent automation",
-  "public": true,
+  "redirect_url": "https://github.com/sudden-network/workflow-agent",
+  "public": false,
   "default_permissions": {
-    "actions": "read",
     "contents": "write",
     "issues": "write",
     "pull_requests": "write",
-    "workflows": "write"
-  },
-  "default_events": []
+    "actions": "read",
+    "metadata": "read"
+  }
 }
