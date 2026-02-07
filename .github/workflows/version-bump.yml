@@ -24,7 +24,7 @@ jobs:
       - name: Version bump via workflow-agent
         uses: sudden-network/workflow-agent@v1
         with:
-          agent_api_key: ${{ secrets.OPENAI_API_KEY }}
+          agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
           github_token: ${{ github.token }}
           resume: true
           prompt: |
