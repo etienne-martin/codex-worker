@@ -16,8 +16,9 @@ inputs:
     required: false
     default: ""
   github_token:
-    description: GitHub token used by the action
-    required: true
+    description: GitHub token used by the action (defaults to `GITHUB_TOKEN`)
+    required: false
+    default: ""
   agent:
     description: Agent to run
     required: false

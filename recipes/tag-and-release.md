@@ -22,7 +22,6 @@ jobs:
         uses: sudden-network/workflow-agent@v1
         with:
           agent_api_key: ${{ secrets.OPENAI_API_KEY }}
-          github_token: ${{ github.token }}
           prompt: |
             Goal: on every push to main, move v{major} to the current commit. If package.json version changed, create v{version} and a GitHub release for it.
 

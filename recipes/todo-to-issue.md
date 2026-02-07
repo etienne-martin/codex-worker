@@ -24,7 +24,6 @@ jobs:
         uses: sudden-network/workflow-agent@v1
         with:
           agent_api_key: ${{ secrets.OPENAI_API_KEY }}
-          github_token: ${{ github.token }}
           prompt: |
             Scan the repository for TODO comments introduced by this merge.
             For each new TODO, check whether a matching issue already exists.
