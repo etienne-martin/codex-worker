@@ -19,6 +19,10 @@ inputs:
     description: GitHub token used by the action (defaults to `GITHUB_TOKEN`)
     required: false
     default: ${{ github.token }}
+  github_token_actor:
+    description: Actor login for the GitHub token (required for non-workflow tokens, e.g. `sudden-agent[bot]`)
+    required: false
+    default: ""
   agent:
     description: Agent to run
     required: false

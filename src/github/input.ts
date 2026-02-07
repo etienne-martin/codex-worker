@@ -16,6 +16,9 @@ export const inputs = {
 
     return token;
   },
+  get githubTokenActor(): string | undefined {
+    return getInput('github_token_actor') || undefined;
+  },
   get agent(): string {
     return getInput('agent') || 'codex';
   },
