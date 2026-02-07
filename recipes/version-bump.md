@@ -25,7 +25,6 @@ jobs:
         uses: sudden-network/workflow-agent@v1
         with:
           agent_api_key: ${{ secrets.OPENAI_API_KEY }}
-          github_token: ${{ github.token }}
           resume: true
           prompt: |
             Goal: keep the package.json version aligned with the impact of changes.

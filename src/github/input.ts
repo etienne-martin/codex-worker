@@ -8,7 +8,13 @@ export const inputs = {
     return getInput('agent_auth_file') || undefined;
   },
   get githubToken(): string {
-    return getInput('github_token', { required: true });
+    const token = getInput('github_token') || process.env.GITHUB_TOKEN;
+
+    if (!token) {
+      throw new Error('Missing GitHub token. Set `github_token` input or `GITHUB_TOKEN` env var.');
+    }
+
+    return token;
   },
   get agent(): string {
     return getInput('agent') || 'codex';

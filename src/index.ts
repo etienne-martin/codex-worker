@@ -4,12 +4,14 @@ import { postErrorComment } from './github/comment';
 import { isIssueOrPullRequest } from './github/context';
 import { githubMcpServer } from './github/mcp';
 import { buildPrompt } from './prompt';
+import { resolveTokenActor } from './github/identity';
 import { fetchTrustedCollaborators, ensureWriteAccess } from './github/security';
 
 const main = async () => {
   try {
-    const [trustedCollaborators, agent] = await Promise.all([
+    const [trustedCollaborators, tokenActor, agent] = await Promise.all([
       fetchTrustedCollaborators(),
+      resolveTokenActor(),
       getAgent(),
       ensureWriteAccess(),
     ]);
@@ -19,7 +21,7 @@ const main = async () => {
         mcpServers: [await githubMcpServer.start()]
       });
 
-      await agent.run(buildPrompt({ resumed, trustedCollaborators }));
+      await agent.run(buildPrompt({ resumed, trustedCollaborators, tokenActor }));
     } finally {
       await Promise.allSettled([
         githubMcpServer.stop(),
