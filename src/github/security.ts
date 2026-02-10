@@ -35,13 +35,10 @@ export const fetchTrustedCollaborators = async (): Promise<TrustedCollaborator[]
       },
     );
 
-    const collaboratorsByLogin = new Map<string, string>();
-
-    for (const collaborator of collaborators) {
-      collaboratorsByLogin.set(collaborator.login, collaborator.role_name);
-    }
-
-    return [...collaboratorsByLogin.entries()].map(([login, roleName]) => ({ login, roleName }));
+    return collaborators.map((collaborator) => ({
+      login: collaborator.login,
+      roleName: collaborator.role_name,
+    }));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to list trusted collaborators for ${owner}/${repo}: ${message}`);
