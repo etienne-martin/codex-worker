@@ -67,7 +67,13 @@ describe('fetchTrustedCollaborators', () => {
 
     expect(paginateMock).toHaveBeenCalledWith(
       listCollaboratorsMock,
-      { owner: 'octo', repo: 'sudden-agent', permission: 'push', per_page: 100 },
+      {
+        owner: 'octo',
+        repo: 'sudden-agent',
+        affiliation: 'direct',
+        permission: 'push',
+        per_page: 100,
+      },
     );
     expect(result).toEqual([
       { login: 'octo', roleName: 'admin' },
