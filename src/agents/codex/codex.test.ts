@@ -26,26 +26,26 @@ describe('agent codex', () => {
     });
 
     it('parses model only', () => {
-      expect(parseModelInput('gpt-5.5-codex')).toEqual({ model: 'gpt-5.5-codex', reasoningEffort: undefined });
+      expect(parseModelInput('gpt-5.4')).toEqual({ model: 'gpt-5.4', reasoningEffort: undefined });
     });
 
     it('parses model and reasoning effort', () => {
-      expect(parseModelInput('gpt-5.5-codex/xhigh')).toEqual({
-        model: 'gpt-5.5-codex',
+      expect(parseModelInput('gpt-5.4/xhigh')).toEqual({
+        model: 'gpt-5.4',
         reasoningEffort: 'xhigh',
       });
     });
 
     it('trims whitespace', () => {
-      expect(parseModelInput(' gpt-5.5-codex / high ')).toEqual({
-        model: 'gpt-5.5-codex',
+      expect(parseModelInput(' gpt-5.4 / high ')).toEqual({
+        model: 'gpt-5.4',
         reasoningEffort: 'high',
       });
     });
 
     it('handles empty model or effort', () => {
       expect(parseModelInput('/high')).toEqual({ model: undefined, reasoningEffort: 'high' });
-      expect(parseModelInput('gpt-5.5-codex/')).toEqual({ model: 'gpt-5.5-codex', reasoningEffort: undefined });
+      expect(parseModelInput('gpt-5.4/')).toEqual({ model: 'gpt-5.4', reasoningEffort: undefined });
     });
   });
 
