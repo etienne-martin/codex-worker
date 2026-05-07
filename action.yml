@@ -32,7 +32,7 @@ inputs:
     required: false
     default: codex
   model:
-    description: Agent model override (for Codex, append reasoning effort with /, e.g. gpt-5.2-codex/xhigh)
+    description: Agent model override (for Codex, append reasoning effort with /, e.g. gpt-5.4/xhigh)
     required: false
     default: ""
   prompt:

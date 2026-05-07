@@ -31,7 +31,7 @@ This makes iterative work practical: the agent remembers what it already covered
 | `agent_auth_file` | no | Agent auth file content (agent-specific). |
 | `github_token` | no | GitHub token used by the action (defaults to the workflow token). |
 | `github_token_actor` | no | Actor login for `github_token` when using a non-workflow token (e.g. `sudden-agent[bot]`). |
-| `model` | no | Agent model override (for Codex, append reasoning effort with /, e.g. `gpt-5.3-codex/xhigh`) |
+| `model` | no | Agent model override (for Codex, append reasoning effort with /, e.g. `gpt-5.4/xhigh`) |
 | `prompt` | no | Additional instructions for the agent. |
 | `resume` | no | Enable session persistence. Default: `false`. |
 | `sudo` | no | Disable sandbox; allow write + network access. Default: `false`. |
