@@ -7,9 +7,10 @@ import { runCommand } from '../../exec';
 import type { ExecOptions } from '@actions/exec';
 import { inputs } from '../../github/input';
 import { isPermissionError } from '../../github/error';
-import { info } from '@actions/core';
+import { info, warning } from '@actions/core';
 import { BootstrapOptions, BootstrapResult } from '../../agent';
 import type { McpServerConfig } from '../../mcp';
+import { updateRepoSecret } from '../../github/secrets';
 
 type AuthStrategy =
   | { kind: 'api_key'; apiKey: string }
@@ -79,6 +80,27 @@ export const resolveAuthStrategy = (): AuthStrategy => {
   throw new Error('Missing auth: set `agent_api_key` or `agent_auth_file`.');
 };
 
+export const hasAuthFileChanged = (initialAuthFile: string, currentAuthFile: string): boolean => {
+  return currentAuthFile.trim() !== initialAuthFile;
+};
+
+export const getAuthFileSecretUpdate = (
+  initialAuthFile: string,
+  secretName: string | undefined,
+  currentAuthFile: string,
+): { authFile: string; secretName: string } | undefined => {
+  const trimmedSecretName = secretName?.trim();
+  const trimmedAuthFile = currentAuthFile.trim();
+
+  if (!trimmedSecretName) return undefined;
+  if (!hasAuthFileChanged(initialAuthFile, trimmedAuthFile)) return undefined;
+
+  return {
+    authFile: trimmedAuthFile,
+    secretName: trimmedSecretName,
+  };
+};
+
 const login = async () => {
   const auth = resolveAuthStrategy();
 
@@ -89,6 +111,31 @@ const login = async () => {
   }
 
   await runCommand('codex', ['login', '--with-api-key'], { input: Buffer.from(auth.apiKey, 'utf8') });
+};
+
+const persistAuthFileSecret = async () => {
+  const auth = resolveAuthStrategy();
+  const secretName = inputs.agentAuthFileSecretName?.trim();
+
+  if (auth.kind !== 'auth_file') return;
+  if (!secretName) return;
+  if (!fs.existsSync(CODEX_AUTH_PATH)) return;
+
+  const update = getAuthFileSecretUpdate(
+    auth.authFile,
+    secretName,
+    fs.readFileSync(CODEX_AUTH_PATH, 'utf8'),
+  );
+
+  if (!update) return;
+
+  try {
+    await updateRepoSecret(update.secretName, update.authFile);
+    info(`Updated ${update.secretName} auth file secret`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    warning(`Failed to update ${update.secretName} auth file secret: ${message}`);
+  }
 };
 
 export const parseModelInput = (value: string | undefined) => {
@@ -112,7 +159,10 @@ export const bootstrap = async ({ mcpServers }: BootstrapOptions): Promise<Boots
 };
 
 export const teardown = async () => {
-  await persistSession();
+  await Promise.all([
+    persistSession(),
+    persistAuthFileSecret(),
+  ]);
 };
 
 export const run = async (prompt: string) => {
