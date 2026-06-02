@@ -1,0 +1,27 @@
+name: test-bench
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+jobs:
+  test-agent-develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run sudden-agent from develop
+        uses: sudden-network/agent@develop
+        with:
+          agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
+          agent_auth_file_secret_name: CODEX_AUTH_JSON
+          model: gpt-5.4/xhigh
+          prompt: Do nothing. This run only verifies sudden-network/agent@develop starts from a workflow.
