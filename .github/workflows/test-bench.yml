@@ -1,0 +1,34 @@
+name: test-bench
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+jobs:
+  test-auth-writeback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Force auth write-back from develop
+        uses: sudden-network/agent@develop
+        with:
+          agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
+          agent_auth_file_secret_name: CODEX_AUTH_JSON
+          model: gpt-5.4/xhigh
+          sudo: true
+          prompt: |
+            Force the auth secret write-back path.
+
+            Run a local command that reads `~/.codex/auth.json`, parses it as JSON, and writes the same object back
+            using `JSON.stringify(value, null, 2) + "\n"`.
+
+            Do not print the auth file contents. Do not modify repository files. Do not post comments.
