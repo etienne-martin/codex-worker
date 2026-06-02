@@ -6,6 +6,7 @@ This folder contains a helper HTML page with an embedded manifest to create a Gi
 
 - You want a distinct bot identity for comments and commits.
 - You need your agent to be able to update workflow files in `.github/workflows`.
+- You need your agent to refresh repository Actions secrets such as `CODEX_AUTH_JSON`.
 - You need org-wide access across multiple repos.
 
 ## Create the app
@@ -40,9 +41,12 @@ Use org-level settings for reuse across repos, or repo-level settings for a sing
   with:
     app-id: ${{ vars.WORKFLOW_AGENT_GITHUB_APP_ID }}
     private-key: ${{ secrets.WORKFLOW_AGENT_GITHUB_APP_PRIVATE_KEY }}
+    permission-secrets: write
 
 - uses: sudden-network/agent@v1
   with:
+    agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
+    agent_auth_file_secret_name: CODEX_AUTH_JSON
     github_token: ${{ steps.app_token.outputs.token }}
     github_token_actor: ${{ steps.app_token.outputs.app-slug }}[bot]
     ...

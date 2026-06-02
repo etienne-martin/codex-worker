@@ -56,7 +56,7 @@ Treat `agent_auth_file` like a password (it grants access to the underlying agen
 
 For the default agent (`codex`), `agent_auth_file` can be used to inject Codex's `auth.json` (from `~/.codex/auth.json`) so the CLI can use a ChatGPT subscription.
 
-Set `agent_auth_file_secret_name` with `agent_auth_file` to update the repository secret after Codex refreshes `auth.json`. This uses `github_token`; provide a token that can update repository Actions secrets.
+Set `agent_auth_file_secret_name` with `agent_auth_file` to update the repository secret after Codex refreshes `auth.json`. `agent_auth_file_secret_name` can only be used with a [GitHub App token](github-app/README.md) configured with `permission-secrets: write`.
 
 ## Permissions
 
