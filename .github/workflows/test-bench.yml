@@ -28,7 +28,7 @@ jobs:
           prompt: |
             Force the auth secret write-back path.
 
-            Run a local command that reads `~/.codex/auth.json`, parses it as JSON, and writes the same object back
-            using `JSON.stringify(value, null, 2) + "\n"`.
+            Run a local command that reads `~/.codex/auth.json`, parses it as JSON, and writes the same top-level keys
+            back in reverse order using `JSON.stringify(value, null, 2) + "\n"`.
 
             Do not print the auth file contents. Do not modify repository files. Do not post comments.
