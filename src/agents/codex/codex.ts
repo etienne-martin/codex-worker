@@ -31,7 +31,11 @@ const shouldResume = (): boolean => {
 
 export const buildConfig = (mcpServers: McpServerConfig[]) => {
   return mcpServers
-    .map(({ name, url }) => `[mcp_servers.${name}]\nurl = "${url}"`)
+    .map(({ name, url }) => [
+      `[mcp_servers.${name}]`,
+      `url = "${url}"`,
+      'default_tools_approval_mode = "approve"',
+    ].join('\n'))
     .join('\n\n');
 };
 

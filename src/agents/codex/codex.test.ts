@@ -18,9 +18,11 @@ describe('agent codex', () => {
         [
           '[mcp_servers.github]',
           'url = "http://localhost:1234/mcp"',
+          'default_tools_approval_mode = "approve"',
           '',
           '[mcp_servers.jira]',
           'url = "https://jira.example.com/mcp"',
+          'default_tools_approval_mode = "approve"',
         ].join('\n'),
       );
     });
