@@ -8,6 +8,14 @@ import { resolveTokenActor } from './github/identity';
 import { fetchTrustedCollaborators, ensureWriteAccess, isTrustedCommentAuthor } from './github/security';
 import { inputs } from './github/input';
 import type { McpServerConfig } from './mcp';
+import type { Agent } from './agent';
+
+const teardown = async (agent: Agent, runSucceeded: boolean) => {
+  await Promise.allSettled([
+    githubMcpServer.stop(),
+    agent.teardown({ runSucceeded }),
+  ]);
+};
 
 const main = async () => {
   try {
@@ -34,11 +42,10 @@ const main = async () => {
       });
 
       await agent.run(buildPrompt({ resumed, trustedCollaborators, tokenActor }));
-    } finally {
-      await Promise.allSettled([
-        githubMcpServer.stop(),
-        agent.teardown(),
-      ]);
+      await teardown(agent, true);
+    } catch (error) {
+      await teardown(agent, false);
+      throw error;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -8,7 +8,7 @@ import type { ExecOptions } from '@actions/exec';
 import { inputs } from '../../github/input';
 import { isPermissionError } from '../../github/error';
 import { info, warning } from '@actions/core';
-import { BootstrapOptions, BootstrapResult } from '../../agent';
+import { BootstrapOptions, BootstrapResult, TeardownOptions } from '../../agent';
 import type { McpServerConfig } from '../../mcp';
 import { updateRepoSecret } from '../../github/secrets';
 
@@ -88,10 +88,12 @@ export const getAuthFileSecretUpdate = (
   initialAuthFile: string,
   secretName: string | undefined,
   currentAuthFile: string,
+  runSucceeded = true,
 ): { authFile: string; secretName: string } | undefined => {
   const trimmedSecretName = secretName?.trim();
   const trimmedAuthFile = currentAuthFile.trim();
 
+  if (!runSucceeded) return undefined;
   if (!trimmedSecretName) return undefined;
   if (!hasAuthFileChanged(initialAuthFile, trimmedAuthFile)) return undefined;
 
@@ -113,7 +115,7 @@ const login = async () => {
   await runCommand('codex', ['login', '--with-api-key'], { input: Buffer.from(auth.apiKey, 'utf8') });
 };
 
-const persistAuthFileSecret = async () => {
+const persistAuthFileSecret = async (runSucceeded: boolean) => {
   const auth = resolveAuthStrategy();
   const secretName = inputs.agentAuthFileSecretName?.trim();
 
@@ -125,6 +127,7 @@ const persistAuthFileSecret = async () => {
     auth.authFile,
     secretName,
     fs.readFileSync(CODEX_AUTH_PATH, 'utf8'),
+    runSucceeded,
   );
 
   if (!update) return;
@@ -158,10 +161,10 @@ export const bootstrap = async ({ mcpServers }: BootstrapOptions): Promise<Boots
   return { resumed };
 };
 
-export const teardown = async () => {
+export const teardown = async ({ runSucceeded }: TeardownOptions) => {
   await Promise.all([
     persistSession(),
-    persistAuthFileSecret(),
+    persistAuthFileSecret(runSucceeded),
   ]);
 };
 
