@@ -20,9 +20,7 @@ const CODEX_VERSION = '0.136.0';
 const CODEX_DIR = path.join(os.homedir(), '.codex');
 const CODEX_CONFIG_PATH = path.join(CODEX_DIR, 'config.toml');
 const CODEX_AUTH_PATH = path.join(CODEX_DIR, 'auth.json');
-const CODEX_LAST_MESSAGE_PATH = path.join(CODEX_DIR, 'last-message.txt');
 const CODEX_SESSIONS_PATH = path.join(CODEX_DIR, 'sessions');
-const BLOCKED_AGENT_MESSAGE_PREFIX = 'SUDDEN_AGENT_BLOCKED:';
 
 const ensureDir = (dir: string) => fs.mkdirSync(dir, { recursive: true });
 
@@ -33,7 +31,11 @@ const shouldResume = (): boolean => {
 
 export const buildConfig = (mcpServers: McpServerConfig[]) => {
   return mcpServers
-    .map(({ name, url }) => `[mcp_servers.${name}]\nurl = "${url}"`)
+    .map(({ name, url }) => [
+      `[mcp_servers.${name}]`,
+      `url = "${url}"`,
+      'default_tools_approval_mode = "approve"',
+    ].join('\n'))
     .join('\n\n');
 };
 
@@ -155,20 +157,6 @@ export const parseModelInput = (value: string | undefined) => {
   };
 };
 
-export const isBlockedAgentMessage = (message: string): boolean => {
-  const trimmed = message.trim();
-  return trimmed.startsWith(BLOCKED_AGENT_MESSAGE_PREFIX) || /^Blocked\b/i.test(trimmed);
-};
-
-const ensureAgentCompleted = () => {
-  if (!fs.existsSync(CODEX_LAST_MESSAGE_PATH)) return;
-
-  const message = fs.readFileSync(CODEX_LAST_MESSAGE_PATH, 'utf8');
-  if (!isBlockedAgentMessage(message)) return;
-
-  throw new Error(message.trim());
-};
-
 export const bootstrap = async ({ mcpServers }: BootstrapOptions): Promise<BootstrapResult> => {
   const [resumed] = await Promise.all([
     restoreSession(),
@@ -192,10 +180,6 @@ export const run = async (prompt: string) => {
   const sandbox = inputs.sudo ? 'danger-full-access' : 'read-only';
   const execOptions: ExecOptions = { input: Buffer.from(prompt, 'utf8') };
 
-  if (fs.existsSync(CODEX_LAST_MESSAGE_PATH)) {
-    fs.unlinkSync(CODEX_LAST_MESSAGE_PATH);
-  }
-
   if (inputs.sudo) {
     execOptions.env = { ...process.env, GITHUB_TOKEN: inputs.githubToken };
   }
@@ -205,7 +189,6 @@ export const run = async (prompt: string) => {
     [
       'exec',
       `--sandbox=${sandbox}`,
-      `--output-last-message=${CODEX_LAST_MESSAGE_PATH}`,
       ...(model ? [`--model=${model}`] : []),
       ...(reasoningEffort ? [`--config=model_reasoning_effort=${reasoningEffort}`] : []),
       ...(serviceTier ? [`--config=service_tier=${serviceTier}`] : []),
@@ -217,6 +200,4 @@ export const run = async (prompt: string) => {
     execOptions,
     'stderr',
   );
-
-  ensureAgentCompleted();
 };

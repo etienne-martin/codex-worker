@@ -2,7 +2,6 @@ import {
   buildConfig,
   getAuthFileSecretUpdate,
   hasAuthFileChanged,
-  isBlockedAgentMessage,
   parseModelInput,
   resolveAuthStrategy,
 } from './codex';
@@ -19,9 +18,11 @@ describe('agent codex', () => {
         [
           '[mcp_servers.github]',
           'url = "http://localhost:1234/mcp"',
+          'default_tools_approval_mode = "approve"',
           '',
           '[mcp_servers.jira]',
           'url = "https://jira.example.com/mcp"',
+          'default_tools_approval_mode = "approve"',
         ].join('\n'),
       );
     });
@@ -84,17 +85,6 @@ describe('agent codex', () => {
       expect(() => parseModelInput('gpt-5.5/ /fast')).toThrow(
         'Invalid model input: service tier requires reasoning effort.',
       );
-    });
-  });
-
-  describe('isBlockedAgentMessage', () => {
-    it('detects blocked agent messages', () => {
-      expect(isBlockedAgentMessage('SUDDEN_AGENT_BLOCKED: missing tools')).toBe(true);
-      expect(isBlockedAgentMessage('Blocked from acting on the event')).toBe(true);
-    });
-
-    it('ignores normal agent messages', () => {
-      expect(isBlockedAgentMessage('Done. No changes needed.')).toBe(false);
     });
   });
 
