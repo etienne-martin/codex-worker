@@ -32,26 +32,57 @@ describe('agent codex', () => {
     });
 
     it('parses model only', () => {
-      expect(parseModelInput('gpt-5.4')).toEqual({ model: 'gpt-5.4', reasoningEffort: undefined });
+      expect(parseModelInput('test-model')).toEqual({
+        model: 'test-model',
+        reasoningEffort: undefined,
+        serviceTier: undefined,
+      });
     });
 
     it('parses model and reasoning effort', () => {
-      expect(parseModelInput('gpt-5.4/xhigh')).toEqual({
-        model: 'gpt-5.4',
+      expect(parseModelInput('test-model/xhigh')).toEqual({
+        model: 'test-model',
         reasoningEffort: 'xhigh',
+        serviceTier: undefined,
+      });
+    });
+
+    it('parses model, reasoning effort, and service tier', () => {
+      expect(parseModelInput('gpt-5.5/xhigh/fast')).toEqual({
+        model: 'gpt-5.5',
+        reasoningEffort: 'xhigh',
+        serviceTier: 'fast',
       });
     });
 
     it('trims whitespace', () => {
-      expect(parseModelInput(' gpt-5.4 / high ')).toEqual({
-        model: 'gpt-5.4',
+      expect(parseModelInput(' test-model / high / fast ')).toEqual({
+        model: 'test-model',
         reasoningEffort: 'high',
+        serviceTier: 'fast',
       });
     });
 
     it('handles empty model or effort', () => {
-      expect(parseModelInput('/high')).toEqual({ model: undefined, reasoningEffort: 'high' });
-      expect(parseModelInput('gpt-5.4/')).toEqual({ model: 'gpt-5.4', reasoningEffort: undefined });
+      expect(parseModelInput('/high')).toEqual({
+        model: undefined,
+        reasoningEffort: 'high',
+        serviceTier: undefined,
+      });
+      expect(parseModelInput('test-model/')).toEqual({
+        model: 'test-model',
+        reasoningEffort: undefined,
+        serviceTier: undefined,
+      });
+    });
+
+    it('throws when service tier skips reasoning effort', () => {
+      expect(() => parseModelInput('gpt-5.5//fast')).toThrow(
+        'Invalid model input: service tier requires reasoning effort.',
+      );
+      expect(() => parseModelInput('gpt-5.5/ /fast')).toThrow(
+        'Invalid model input: service tier requires reasoning effort.',
+      );
     });
   });
 
