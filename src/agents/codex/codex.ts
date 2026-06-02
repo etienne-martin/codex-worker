@@ -16,7 +16,7 @@ type AuthStrategy =
   | { kind: 'api_key'; apiKey: string }
   | { kind: 'auth_file'; authFile: string };
 
-const CODEX_VERSION = '0.98.0';
+const CODEX_VERSION = '0.136.0';
 const CODEX_DIR = path.join(os.homedir(), '.codex');
 const CODEX_CONFIG_PATH = path.join(CODEX_DIR, 'config.toml');
 const CODEX_AUTH_PATH = path.join(CODEX_DIR, 'auth.json');
@@ -140,10 +140,16 @@ const persistAuthFileSecret = async () => {
 
 export const parseModelInput = (value: string | undefined) => {
   if (!value) return {};
-  const [model, reasoningEffort] = value.split('/', 2).map((part) => part.trim());
+  const [model, reasoningEffort, serviceTier] = value.split('/').map((part) => part.trim());
+
+  if (serviceTier && !reasoningEffort) {
+    throw new Error('Invalid model input: service tier requires reasoning effort.');
+  }
+
   return {
     model: model || undefined,
     reasoningEffort: reasoningEffort || undefined,
+    serviceTier: serviceTier || undefined,
   };
 };
 
@@ -166,7 +172,7 @@ export const teardown = async () => {
 };
 
 export const run = async (prompt: string) => {
-  const { model, reasoningEffort } = parseModelInput(inputs.model);
+  const { model, reasoningEffort, serviceTier } = parseModelInput(inputs.model);
   const sandbox = inputs.sudo ? 'danger-full-access' : 'read-only';
   const execOptions: ExecOptions = { input: Buffer.from(prompt, 'utf8') };
 
@@ -181,6 +187,7 @@ export const run = async (prompt: string) => {
       `--sandbox=${sandbox}`,
       ...(model ? [`--model=${model}`] : []),
       ...(reasoningEffort ? [`--config=model_reasoning_effort=${reasoningEffort}`] : []),
+      ...(serviceTier ? [`--config=service_tier=${serviceTier}`] : []),
       '-',
       'resume',
       '--last',
