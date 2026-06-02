@@ -12,11 +12,14 @@ jobs:
   tag-and-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Tag and release via sudden-agent
-        uses: sudden-network/agent@v1
+        uses: ./
         with:
           agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
-          model: gpt-5.4/xhigh
+          model: gpt-5.5/xhigh/fast
           prompt: |
             Goal: on every push to main, move v{major} to the current commit. If package.json version changed, create v{version} and a GitHub release for it.
 
