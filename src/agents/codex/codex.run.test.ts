@@ -51,6 +51,7 @@ describe('codex run', () => {
 
     const args = runCommandMock.mock.calls[0][1];
     expect(args).toEqual(expect.arrayContaining([
+      expect.stringContaining('--output-last-message='),
       '--model=gpt-5.5',
       '--config=model_reasoning_effort=xhigh',
       '--config=service_tier=fast',

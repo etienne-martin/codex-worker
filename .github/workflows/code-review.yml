@@ -37,6 +37,7 @@ jobs:
           agent_auth_file: ${{ secrets.CODEX_AUTH_JSON }}
           model: gpt-5.5/xhigh/fast
           resume: true
+          sudo: true
           prompt: |
             Goals:
             - Help the developer get this change shipped.
