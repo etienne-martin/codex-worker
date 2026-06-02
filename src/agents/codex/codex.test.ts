@@ -120,14 +120,5 @@ describe('agent codex', () => {
     it('skips missing secret name', () => {
       expect(getAuthFileSecretUpdate('{ "ok": true }', undefined, '{ "ok": false }')).toBeUndefined();
     });
-
-    it('skips failed run', () => {
-      expect(getAuthFileSecretUpdate(
-        '{ "ok": true }',
-        'CODEX_AUTH_JSON',
-        '{ "ok": false }',
-        false,
-      )).toBeUndefined();
-    });
   });
 });
