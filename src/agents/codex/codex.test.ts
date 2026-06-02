@@ -1,4 +1,10 @@
-import { buildConfig, parseModelInput, resolveAuthStrategy } from './codex';
+import {
+  buildConfig,
+  getAuthFileSecretUpdate,
+  hasAuthFileChanged,
+  parseModelInput,
+  resolveAuthStrategy,
+} from './codex';
 
 describe('agent codex', () => {
   describe('buildConfig', () => {
@@ -88,4 +94,31 @@ describe('agent codex', () => {
       );
     });
   });
-})
+
+  describe('hasAuthFileChanged', () => {
+    it('returns false when unchanged', () => {
+      expect(hasAuthFileChanged('{ "ok": true }', '{ "ok": true }\n')).toBe(false);
+    });
+
+    it('returns true when changed', () => {
+      expect(hasAuthFileChanged('{ "ok": true }', '{ "ok": false }')).toBe(true);
+    });
+  });
+
+  describe('getAuthFileSecretUpdate', () => {
+    it('returns update when auth file changed', () => {
+      expect(getAuthFileSecretUpdate('{ "ok": true }', ' CODEX_AUTH_JSON ', '{ "ok": false }\n')).toEqual({
+        authFile: '{ "ok": false }',
+        secretName: 'CODEX_AUTH_JSON',
+      });
+    });
+
+    it('skips unchanged auth file', () => {
+      expect(getAuthFileSecretUpdate('{ "ok": true }', 'CODEX_AUTH_JSON', '{ "ok": true }\n')).toBeUndefined();
+    });
+
+    it('skips missing secret name', () => {
+      expect(getAuthFileSecretUpdate('{ "ok": true }', undefined, '{ "ok": false }')).toBeUndefined();
+    });
+  });
+});

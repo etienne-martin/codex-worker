@@ -29,6 +29,7 @@ This makes iterative work practical: the agent remembers what it already covered
 | `agent` | no | Agent to run (`codex` default). |
 | `agent_api_key` | no | Agent API key. Required unless `agent_auth_file` is set. |
 | `agent_auth_file` | no | Agent auth file content (agent-specific). |
+| `agent_auth_file_secret_name` | no | GitHub Actions secret name to update when the agent auth file refreshes. |
 | `github_token` | no | GitHub token used by the action (defaults to the workflow token). |
 | `github_token_actor` | no | Actor login for `github_token` when using a non-workflow token (e.g. `sudden-agent[bot]`). |
 | `model` | no | Agent model override (for Codex, append reasoning effort with /, e.g. `gpt-5.4/xhigh`) |
@@ -54,6 +55,8 @@ Authentication is agent-specific, but this action exposes two generic ways to pa
 Treat `agent_auth_file` like a password (it grants access to the underlying agent account).
 
 For the default agent (`codex`), `agent_auth_file` can be used to inject Codex's `auth.json` (from `~/.codex/auth.json`) so the CLI can use a ChatGPT subscription.
+
+Set `agent_auth_file_secret_name` with `agent_auth_file` to update the repository secret after Codex refreshes `auth.json`. `agent_auth_file_secret_name` can only be used with a [GitHub App token](github-app/README.md) configured with `permission-secrets: write`.
 
 ## Permissions
 
