@@ -43,4 +43,17 @@ describe('codex run', () => {
     const options = runCommandMock.mock.calls[0][2];
     expect(options.env).toBeUndefined();
   });
+
+  it('passes model config', async () => {
+    inputsMock.model = 'gpt-5.5/xhigh/fast';
+
+    await run('prompt');
+
+    const args = runCommandMock.mock.calls[0][1];
+    expect(args).toEqual(expect.arrayContaining([
+      '--model=gpt-5.5',
+      '--config=model_reasoning_effort=xhigh',
+      '--config=service_tier=fast',
+    ]));
+  });
 });
